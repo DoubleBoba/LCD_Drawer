@@ -1,25 +1,21 @@
 package ru.kingofsystem
 
 import javafx.application.Application
+import javafx.event.EventHandler
 import javafx.fxml.FXMLLoader
 import javafx.scene.Node
 import javafx.scene.Scene
+import javafx.scene.input.MouseEvent
 import javafx.scene.layout.AnchorPane
 import javafx.stage.Stage
 import ru.kingofsystem.controllers.MainController
 
 fun main(args: Array<String>) {
-
-    var b = 1
-    b = (b shl 1) or 1
-    println(b)
-    println(b.toByte())
-
     val app = Main()
     app.startApp(args)
 }
 
-
+var changeBytes: EventHandler<MouseEvent>? = null
 
 
 class Main : Application() {

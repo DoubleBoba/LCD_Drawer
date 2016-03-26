@@ -6,6 +6,8 @@ import javafx.scene.Node
 import javafx.scene.control.ToggleButton
 import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.HBox
+import javafx.scene.layout.Priority
+import ru.kingofsystem.changeBytes
 
 /**
  * Created by tamtaradm on 23.03.16.
@@ -19,7 +21,9 @@ class LcdRowController {
     private fun initialize() {
         var i = 0
         do {
-            pane?.children?.add(create_btn())
+            val btn = create_btn()
+            pane?.children?.add(btn)
+            btn.onMouseClicked = changeBytes
         }while((++i) < 5)
 
     }
@@ -28,6 +32,7 @@ class LcdRowController {
         val loader = FXMLLoader()
         loader.location = LcdRowController::class.java.getResource("/views/lcd_cell.fxml")
         val btn: ToggleButton = loader.load()
+        HBox.setHgrow(btn, Priority.SOMETIMES)
         return btn
     }
 

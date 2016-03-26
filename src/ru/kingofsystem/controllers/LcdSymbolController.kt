@@ -4,6 +4,7 @@ import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
 import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.HBox
+import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import ru.kingofsystem.resetAnchor
 import java.util.*
@@ -27,7 +28,7 @@ class LcdSymbolController {
             val loader = FXMLLoader()
             loader.location = LcdRowController::class.java.getResource("/views/lcd_row.fxml")
             val pane: HBox = loader.load()
-            resetAnchor(pane)
+            VBox.setVgrow(pane, Priority.SOMETIMES)
             rows?.children?.add(pane)
             val controller: LcdRowController = loader.getController()
             rowsControllers.add(controller)
