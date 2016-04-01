@@ -1,99 +1,95 @@
 package ru.kingofsystem.controllers
 
-import javafx.beans.value.ChangeListener
+import javafx.application.Platform
+import javafx.collections.FXCollections
 import javafx.event.EventHandler
+import javafx.event.EventType
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
-import javafx.scene.control.Button
-import javafx.scene.control.ChoiceBox
-import javafx.scene.control.Label
-import javafx.scene.control.TextField
-import javafx.scene.input.Clipboard
-import javafx.scene.input.ClipboardContent
+import javafx.scene.control.*
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.AnchorPane
-import javafx.scene.layout.VBox
+import javafx.scene.layout.HBox
 import jssc.SerialPortList
-import ru.kingofsystem.Main
 import ru.kingofsystem.changeBytes
 import ru.kingofsystem.resetAnchor
-import javax.rmi.CORBA.Util
-
+import kotlin.concurrent.timer
 /**
  * Created by tamtaradam on 24.03.16.
  */
 class MainController {
 
     @FXML
-    private var symbolPane: AnchorPane? = null
-    private var symbolCtrl: LcdSymbolController? = null
+    private lateinit var notationPane: AnchorPane
+    @FXML
+    private lateinit  var exitBtn: Button
+    @FXML
+    private lateinit var mcuBtn: Button
+    @FXML
+    private lateinit var clipboardBtn: Button
+    @FXML
+    private lateinit var comChoice: ChoiceBox<String>
+    @FXML
+    private lateinit var baudChoice: TextField
+    @FXML
+    private lateinit var alphabetBox: AnchorPane
+    @FXML
+    private lateinit var menuBar: MenuBar
+    @FXML
+    private lateinit var lcdPane: AnchorPane
 
-    @FXML
-    private var notationPane: AnchorPane? = null
-    @FXML
-    private var exitBtn: Button? = null
-    @FXML
-    private var mcuBtn: Button? = null
-    @FXML
-    private var clipboardBtn: Button? = null
-    @FXML
-    private var hexNotation: Label? = null
-    @FXML
-    private var comChoice: ChoiceBox<String>? = null
-    @FXML
-    private var baudChoice: TextField? = null
+    private lateinit var alphabetController: AlphabetController
 
     @FXML
     private fun initialize() {
-        symbolPane?.isPickOnBounds = true
-        symbolPane?.isMouseTransparent = false
+        alphabetBox.isMouseTransparent
         changeBytes = onSymbolUpdate
-        initSymbol()
-        mcuBtn?.onMouseClicked = onMcuClicked
-        clipboardBtn?.onMouseClicked = onClipboard
-        symbolPane?.onMouseClicked = onSymbolUpdate
-
+        initAlphabet()
+        mcuBtn.onMouseClicked = onMcuClicked
+        clipboardBtn.onMouseClicked = onClipboard
+        alphabetBox.addEventFilter(MouseEvent.MOUSE_CLICKED, { e:MouseEvent ->
+            val ctrl = alphabetController.getLcdSymbolCtrl(e.sceneX, e.sceneY)
+            ctrl?.getBytes()?.map { i -> print(i) }
+            println()
+        })
         initPorts()
     }
 
-    private fun initSymbol() {
-        val loader = FXMLLoader(MainController::class.java.getResource("/views/lcd_symbol.fxml"))
-        val smbl: VBox = loader.load()
-        resetAnchor(smbl)
-        symbolPane?.children?.add(smbl)
-        symbolCtrl = loader.getController()
-
-
+    private fun initAlphabet() {
+        // TODO Add alphabet to args
+        val loader = FXMLLoader(MainController::class.java.getResource("/views/alphabet_pane.fxml"))
+        val pane: HBox = loader.load()
+        alphabetBox.children.add(pane)
+        resetAnchor(pane)
+        alphabetController = loader.getController()
+        alphabetController.setSymbolsCount(8) // FIXME Need to be in args
     }
 
     private val onSymbolUpdate = EventHandler {e:MouseEvent ->
-        val bytes: Array<Byte>? = symbolCtrl?.getBytes()
-        var str = ""
-        bytes?.map { i ->
-            str += Integer.toHexString(i.toInt()) + ", "
-        }
-        hexNotation?.text = str.toUpperCase().substring(0, str.length - 2)
+
     }
 
     private val onMcuClicked = EventHandler { e:MouseEvent ->
-        val bytes = symbolCtrl?.getBytes()
-        bytes?.map { i ->
-            print(Integer.toBinaryString(i.toInt()))
-            print(" ")
+        val alphabet = alphabetController.getAlphabet()
+        alphabet.map { arr ->
+            var str = ""
+            arr.map { b ->  str += Integer.toHexString(b.toInt()) + " " }
+            println(str)
         }
-        println()
     }
 
     private val onClipboard = EventHandler {e:MouseEvent ->
-        val clipboard = Clipboard.getSystemClipboard()
-        val content = ClipboardContent()
-        content.putString(hexNotation?.text)
-        clipboard.setContent(content)
+        throw NotImplementedError()
     }
 
     private fun initPorts() {
-        val portList: Array<String> = SerialPortList.getPortNames()
-        comChoice?.items?.addAll(*portList)
-
+        timer(name = "Com updater", daemon = true, period = 1000, action = {
+            val portList: Array<String> = SerialPortList.getPortNames()
+            Platform.runLater {
+                val list = FXCollections.observableArrayList<String>()
+                list.addAll(*portList)
+                comChoice.items = list
+            }
+        })
     }
 }
