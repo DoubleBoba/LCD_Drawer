@@ -36,8 +36,7 @@ class AlphabetController {
     }
 
     private fun createSymbol() {
-        val loader = FXMLLoader(AlphabetController::class.java.getResource("/views/lcd_symbol.fxml"))
-        val symbol: VBox = loader.load()
+
         symbol.padding = Insets(0.toDouble(), 3.toDouble(), 0.toDouble(), 0.toDouble())
         box.children.add(symbol)
         val ctrl: LcdSymbolController = loader.getController()

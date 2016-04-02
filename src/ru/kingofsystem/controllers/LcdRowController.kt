@@ -1,5 +1,7 @@
 package ru.kingofsystem.controllers
 
+import javafx.beans.property.IntegerProperty
+import javafx.beans.value.ChangeListener
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
 import javafx.scene.Node
@@ -18,6 +20,9 @@ class LcdRowController {
     private lateinit  var pane: HBox
 
     @FXML
+    private lateinit var byteProperty: IntegerProperty
+
+    @FXML
     private fun initialize() {
         var i = 0
         do {
@@ -34,16 +39,27 @@ class LcdRowController {
         loader.location = LcdRowController::class.java.getResource("/views/lcd_cell.fxml")
         val btn: ToggleButton = loader.load()
         HBox.setHgrow(btn, Priority.SOMETIMES)
+        btn.selectedProperty().addListener(stateChecker)
         return btn
     }
 
     fun getBits(): Byte {
+        return byteProperty.get().toByte()
+    }
+
+    fun getByteProperty(): IntegerProperty = byteProperty
+
+    val stateChecker = ChangeListener<Boolean> { observable, old, new ->
         var b = 0
         pane.children.map {x: Node ->
             val btn = x as ToggleButton
             b = if (btn.isSelected) (b shl 1) or 1 else (b shl 1)
         }
-        return b.toByte()
+        byteProperty.set(b)
+    }
+
+    fun setBits(b:Byte) {
+
     }
 
 }

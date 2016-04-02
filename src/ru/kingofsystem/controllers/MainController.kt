@@ -6,7 +6,10 @@ import javafx.event.EventHandler
 import javafx.event.EventType
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
+import javafx.geometry.Side
+import javafx.scene.Node
 import javafx.scene.control.*
+import javafx.scene.input.MouseButton
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.HBox
@@ -47,11 +50,7 @@ class MainController {
         initAlphabet()
         mcuBtn.onMouseClicked = onMcuClicked
         clipboardBtn.onMouseClicked = onClipboard
-        alphabetBox.addEventFilter(MouseEvent.MOUSE_CLICKED, { e:MouseEvent ->
-            val ctrl = alphabetController.getLcdSymbolCtrl(e.sceneX, e.sceneY)
-            ctrl?.getBytes()?.map { i -> print(i) }
-            println()
-        })
+        alphabetBox.addEventFilter(MouseEvent.MOUSE_CLICKED, alphabetContextEvent)
         initPorts()
     }
 
@@ -62,7 +61,7 @@ class MainController {
         alphabetBox.children.add(pane)
         resetAnchor(pane)
         alphabetController = loader.getController()
-        alphabetController.setSymbolsCount(8) // FIXME Need to be in args
+        alphabetController.setSymbolsCount(10) // FIXME Need to be in args
     }
 
     private val onSymbolUpdate = EventHandler {e:MouseEvent ->
@@ -80,6 +79,8 @@ class MainController {
 
     private val onClipboard = EventHandler {e:MouseEvent ->
         throw NotImplementedError()
+
+
     }
 
     private fun initPorts() {
@@ -92,4 +93,15 @@ class MainController {
             }
         })
     }
+
+    val alphabetContextEvent = EventHandler { e:MouseEvent ->
+        if (e.button == MouseButton.SECONDARY) {
+            val contextMenu = ContextMenu()
+            val item = MenuItem("Choose")
+            item.setOnAction { println("Choose!!!") }
+            contextMenu.items.add(item)
+            contextMenu.show((e.target as Node), Side.RIGHT, 0.toDouble(), 0.toDouble())
+        }
+    }
+
 }

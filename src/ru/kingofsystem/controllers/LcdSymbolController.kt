@@ -14,7 +14,7 @@ import java.util.*
  */
 class LcdSymbolController {
     @FXML
-    private var rows: VBox? = null
+    private lateinit  var rows: VBox
 
     private var rowsControllers: ArrayList<LcdRowController> = ArrayList()
 
@@ -29,7 +29,7 @@ class LcdSymbolController {
             loader.location = LcdRowController::class.java.getResource("/views/lcd_row.fxml")
             val pane: HBox = loader.load()
             VBox.setVgrow(pane, Priority.SOMETIMES)
-            rows?.children?.add(pane)
+            rows.children.add(pane)
             val controller: LcdRowController = loader.getController()
             rowsControllers.add(controller)
         })
@@ -39,6 +39,10 @@ class LcdSymbolController {
         return Array(rowsControllers.size, {i ->
             return@Array rowsControllers[i].getBits()
         })
+    }
+
+    fun bindSymbol(symbol: LcdSymbolController) {
+        rowsControllers.mapIndexed { i, lcdRowController -> lcdRowController.getByteProperty().bind(symbol.rowsControllers[i].getByteProperty())}
     }
 
 }
